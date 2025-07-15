@@ -2,8 +2,6 @@ import os
 import fitz  # PyMuPDF
 import pdfplumber
 import pdfminer.high_level
-import io
-import json
 
 
 def extract_all_from_pdf(pdf_path: str) -> dict:
@@ -14,6 +12,8 @@ def extract_all_from_pdf(pdf_path: str) -> dict:
         **extract_tables(pdf_path)
     }
     return result
+
+
 def is_scanned_pdf(pdf_path: str) -> bool:
     # Скан или нет — по наличию текста
     import fitz

@@ -1,6 +1,9 @@
+import os
+import json
 from flask import Flask, request, render_template
-import os, shutil
-from app import extract
+import app
+from app.extract import extract_all_from_pdf
+# from app.runner import process_pdf_folder
 
 # Абсолютный путь к текущей директории
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -19,29 +22,17 @@ def index():
 
         paths = []
         if file:
-            path = os.path.join("uploads", file.filename)
+            filename = file.filename
+            path = os.path.join("uploads", filename)
             file.save(path)
-            paths = [path]
-        elif folder:
-            paths = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith(".pdf")]
+            name = os.path.splitext(filename)[0]
+            out_path = os.path.join(output, f"{name}.json")
+            result = extract_all_from_pdf(path)
+            with open(out_path, "w", encoding="utf-8") as f:
+                json.dump(result, f, ensure_ascii=False, indent=2)
 
-        for pdf_path in paths:
-            name = os.path.splitext(os.path.basename(pdf_path))[0]
-            out_path = os.path.join(output, name)
-            os.makedirs(out_path, exist_ok=True)
-
-            # Извлекаем
-            text = extract.extract_text_from_pdf(pdf_path)
-            with open(os.path.join(out_path, "text.txt"), "w", encoding="utf-8") as f:
-                f.write(text)
-
-            tables = extract.extract_tables(pdf_path)
-            for idx, table in enumerate(tables):
-                with open(os.path.join(out_path, f"table_{idx}.csv"), "w", encoding="utf-8") as f:
-                    for row in table:
-                        f.write(",".join(row) + "\n")
-
-            extract.extract_images_from_pdf(pdf_path, out_path)
+        elif folder and os.path.isdir(path):
+            app.runner.process_pdf_folder(folder, output, max_workers=os.cpu_count())
 
         return "Обработка завершена!"
     return render_template("index.html")
