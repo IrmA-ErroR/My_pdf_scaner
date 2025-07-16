@@ -42,11 +42,12 @@ def extract_images_count(path: str) -> dict:
 
 
 def extract_tables(path: str) -> dict:
-    tables = []
     try:
+        tables_count = 0
         with pdfplumber.open(path) as pdf:
             for page in pdf.pages:
-                tables.extend(page.extract_tables())
-        return tables
+                page_tables = page.extract_tables()
+                tables_count += len(page_tables)
+        return {"tables_count": tables_count}
     except Exception as e:
-        return {"image_count": '', "error": str(e)}
+        return {"tables_count": 0, "error": str(e)}

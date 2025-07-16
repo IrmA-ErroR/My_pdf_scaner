@@ -1,7 +1,7 @@
 import os
 import json
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from extract import extract_all_from_pdf
+from app.extractor import extract_all_from_pdf
 
 
 def process_and_save(pdf_path, output_dir):

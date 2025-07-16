@@ -59,7 +59,7 @@
 <body>
     <div class="container">
         <h2>Обработчик PDF-файлов</h2>
-        <form method="post" enctype="multipart/form-data">
+        <form enctype="multipart/form-data">
             <div class="form-group">
                 <label>Загрузить PDF-файл</label>
                 <input type="file" name="pdf_file">
@@ -70,11 +70,52 @@
             </div>
             <div class="form-group">
                 <label>Сохранить в</label>
-                <input type="text" name="output_dir" placeholder="C:/путь/к/папке" required>
+                <input type="text" name="output_dir" placeholder="C:/путь/к/папке">
             </div>
             <button type="submit">Начать обработку</button>
         </form>
-        <p class="note">* Пока ничего не происходит — заглушка для интерфейса</p>
     </div>
 </body>
+<script>
+    const fileInput = document.querySelector('input[name="pdf_file"]');
+    const folderInput = document.querySelector('input[name="pdf_folder"]');
+    const form = document.querySelector('form');
+
+    fileInput.addEventListener('input', () => {
+        if (fileInput.files.length > 0) {
+            folderInput.disabled = true;
+            folderInput.value = '';
+        } else {
+            folderInput.disabled = false;
+        }
+    });
+
+    folderInput.addEventListener('input', () => {
+        if (folderInput.value.trim() !== '') {
+            fileInput.disabled = true;
+            fileInput.value = '';
+        } else {
+            fileInput.disabled = false;
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+        // После завершения запроса отобразится сообщение
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        fetch("/", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text())
+        .then(data => {
+            alert("Обработка завершена!");
+            form.reset();
+            fileInput.disabled = false;
+            folderInput.disabled = false;
+        })
+        .catch(() => alert("Ошибка при обработке"));
+    });
+</script>
 </html>
